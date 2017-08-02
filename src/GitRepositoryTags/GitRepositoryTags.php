@@ -19,7 +19,7 @@ class GitRepositoryTags
 {
 	use Nette\SmartObject;
 
-	private const PATH_GIT_TAGS = '.git/refs/tags';
+	private $pathGitTags = '.git/refs/tags';
 
 	/** @var string */
 	private $path;
@@ -42,7 +42,7 @@ class GitRepositoryTags
 
 	public function __construct($directory, $versionPrefix = 'v')
 	{
-		$this->path = $directory . '/' . self::PATH_GIT_TAGS;
+		$this->path = $directory . '/' . $this->pathGitTags;
 		$this->versionPrefix = $versionPrefix;
 
 		if (!is_dir($this->path)) {
