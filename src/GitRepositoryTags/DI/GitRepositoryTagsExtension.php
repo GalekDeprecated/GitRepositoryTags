@@ -17,6 +17,6 @@ class GitRepositoryTagsExtension extends CompilerExtension
 		]);
 
 		$builder->addDefinition($this->prefix('gitRepositoryTags'))
-			->setClass('App\Galek\Utils\GitRepositoryTags\GitRepositoryTags', $config);
+			->setClass('Galek\GitRepositoryTags\GitRepositoryTags', $config);
 	}
 }
