@@ -5,6 +5,7 @@
  * Date: 2.8.2017
  * Time: 13:57
  */
+
 namespace Galek\GitRepositoryTags;
 
 use Nette;
@@ -43,6 +44,7 @@ class GitRepositoryTags
 	public function __construct($directory, $versionPrefix = 'v')
 	{
 		$this->path = $directory . '/' . $this->pathGitTags;
+
 		$this->versionPrefix = $versionPrefix;
 
 		if (!is_dir($this->path)) {
@@ -82,24 +84,36 @@ class GitRepositoryTags
 	}
 
 
-	public function getTags() : array
+	/**
+	 * @return array
+	 */
+	public function getTags()
 	{
-		return (!empty($this->tags) ? $this->tags : []);
+		return !empty($this->tags) ? $this->tags : [];
 	}
 
 
+	/**
+	 * @return array
+	 */
 	public function getVersions()
 	{
-		return (!empty($this->versions) ? $this->versions : []);
+		return !empty($this->versions) ? $this->versions : [];
 	}
 
 
+	/**
+	 * @return string|null
+	 */
 	public function getLatestTag()
 	{
 		return $this->latestTag;
 	}
 
 
+	/**
+	 * @return string|null
+	 */
 	public function getLatestVersion()
 	{
 		return $this->latestVersion;

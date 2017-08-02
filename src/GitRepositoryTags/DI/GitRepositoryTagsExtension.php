@@ -1,10 +1,5 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: Galek
- * Date: 2.8.2017
- * Time: 14:25
- */
+
 namespace Galek\GitRepositoryTags\DI;
 
 use Nette\DI\CompilerExtension;
@@ -17,7 +12,7 @@ class GitRepositoryTagsExtension extends CompilerExtension
 
 		$config = $this->getConfig([
 			'directory' => null,
-			'versionPrefix' => 'v'
+			'versionPrefix' => 'v',
 		]);
 
 		$builder->addDefinition($this->prefix('gitRepositoryTags'))

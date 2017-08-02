@@ -10,5 +10,5 @@ $container = require __DIR__ . '/bootstrap.php';
 
 abstract class GRTTestCase extends Tester\TestCase
 {
-	public $directory = __DIR__ . "/temp";
+	public $directory = __DIR__ . '/temp';
 }
