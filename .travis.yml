@@ -6,10 +6,15 @@ php:
   - 7.0
   - 7.1
 
-before_script:
-  - travis_retry composer update --no-interaction
+before_install:
+  - composer self-update
+
+install:
+  - composer install --no-interaction --prefer-source
+  - composer create-project nette/coding-standard coding-standard
 
 script:
+  - coding-standard/vendor/symplify/easy-coding-standard/bin/ecs check src/ tests/ --config coding-standard/coding-standard-php56.neon
   - vendor/bin/tester -p php-cgi tests
 
 after_failure:
