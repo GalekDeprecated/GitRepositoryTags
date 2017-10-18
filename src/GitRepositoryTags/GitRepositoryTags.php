@@ -63,7 +63,9 @@ class GitRepositoryTags
 		$this->byCurrentBranch = $byCurrentBranch;
 
 		$this->gitPath = realpath($directory) . '/.git';
+
 		$this->path = $this->gitPath . '/' . $this->pathGitTags;
+
 		$this->pathHead = $this->gitPath . '/' . $this->pathGitHead;
 
 		$this->versionPrefix = $versionPrefix;
@@ -125,6 +127,7 @@ class GitRepositoryTags
 					$this->currentVersion = $this->getCurrentCommitId();
 				}
 			}
+
 		} else {
 			if ($this->byCurrentBranch && !$this->currentVersion) {
 				$this->currentVersion = $this->getCurrentCommitId();
@@ -137,6 +140,7 @@ class GitRepositoryTags
 	{
 		if (($ref = $this->getHeadRef()) !== null) {
 			return $this->readFile($this->gitPath . '/' . $ref);
+
 		} else {
 			return $this->getHeadRef(true);
 		}
@@ -149,7 +153,7 @@ class GitRepositoryTags
 	{
 		$rep = $this->readFile($this->pathHead);
 
-		preg_match("/ref: (.*)?/", $rep, $match);
+		preg_match('/ref: (.*)?/', $rep, $match);
 
 		if ($c === true) {
 			if (empty($match)) {
@@ -209,6 +213,7 @@ class GitRepositoryTags
 	public function getCurrentVersion()
 	{
 		$this->init();
+
 		return $this->currentVersion;
 	}
 
@@ -216,7 +221,9 @@ class GitRepositoryTags
 	private function readFile(string $file)
 	{
 		$handle = fopen('nette.safe://' . realpath($file), 'r');
+
 		$content = fread($handle, filesize($file));
+
 		fclose($handle);
 
 		return $content;

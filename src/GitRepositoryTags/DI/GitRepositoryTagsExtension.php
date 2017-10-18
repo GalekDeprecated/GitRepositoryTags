@@ -14,7 +14,7 @@ class GitRepositoryTagsExtension extends CompilerExtension
 		$config = $this->getConfig([
 			'directory' => null,
 			'versionPrefix' => 'v',
-			'byCurrentBranch' => false
+			'byCurrentBranch' => false,
 		]);
 
 		$builder->addDefinition($this->prefix('gitRepositoryTags'))
