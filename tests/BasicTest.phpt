@@ -11,7 +11,7 @@ class BasicTest extends GRTTestCase
 {
 	public function testOne()
 	{
-		$grt = new GitRepositoryTags($this->directory);
+		$grt = new GitRepositoryTags(__DIR__ . '/temp');
 
 		Assert::equal('v20.1.0', $grt->latestVersion);
 

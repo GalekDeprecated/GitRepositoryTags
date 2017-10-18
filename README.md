@@ -19,9 +19,10 @@ Basic usage:
 ----------
 
 ```php
-$directory = __DIR__ . '/../'; // where we have directory `.git`
+$directory = __DIR__ . '/..'; // where we have directory `.git`, not end with `/` or `\`
 $versionPrefix = 'v'; // prefix for version, default is v, so v1.0.0
-$gitTags = new \Galek\GitRepositoryTags\GitRepositoryTags($directory, $versionPrefix);
+$currentBranchVersion = true; // true|false , return version by HEAD of branch
+$gitTags = new \Galek\GitRepositoryTags\GitRepositoryTags($directory, $versionPrefix, $currentBranchVersion);
 
 // gets informations:
 
@@ -39,8 +40,9 @@ extensions:
     gitTags: Galek\GitRepositoryTags\DI\GitRepositoryTagsExtension
 
 gitTags:
-	directory: %appDir%/../
+	directory: %appDir%/..
 	versionPrefix: 'v'
+	byCurrentBranch: true
 ```
 
 Presenter
@@ -53,6 +55,7 @@ class BasePresenter extends Presenter
     public function renderDefault()
     {
         $this->template->version = $this->gitTags->latestVersion;
+        $this->template->currentVersion = $this->gitTags->currentVersion;
     }
 }
 

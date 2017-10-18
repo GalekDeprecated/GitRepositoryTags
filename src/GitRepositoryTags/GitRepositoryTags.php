@@ -10,21 +10,31 @@ declare(strict_types=1);
 namespace Galek\GitRepositoryTags;
 
 use Nette;
+use SplFileInfo;
 
 /**
  * @property-read array $tags
  * @property-read array $versions
  * @property-read string $latestTag
  * @property-read string $latestVersion
+ * @property-read string|null $currentVersion
  */
 class GitRepositoryTags
 {
 	use Nette\SmartObject;
 
-	private $pathGitTags = '.git/refs/tags';
+	private $pathGitTags = 'refs/tags';
+
+	private $pathGitHead = 'HEAD';
 
 	/** @var string */
 	private $path;
+
+	/** @var string */
+	private $gitPath;
+
+	/** @var string */
+	private $pathHead;
 
 	/** @var array */
 	private $tags;
@@ -41,15 +51,29 @@ class GitRepositoryTags
 	/** @var string */
 	private $versionPrefix = 'v';
 
+	/** @var bool */
+	private $byCurrentBranch;
 
-	public function __construct($directory, $versionPrefix = 'v')
+	/** @var string|null */
+	private $currentVersion;
+
+
+	public function __construct($directory, $versionPrefix = 'v', $byCurrentBranch = false)
 	{
-		$this->path = $directory . '/' . $this->pathGitTags;
+		$this->byCurrentBranch = $byCurrentBranch;
+
+		$this->gitPath = $directory . '/.git';
+		$this->path = $this->gitPath . '/' . $this->pathGitTags;
+		$this->pathHead = $this->gitPath . '/' . $this->pathGitHead;
 
 		$this->versionPrefix = $versionPrefix;
 
 		if (!is_dir($this->path)) {
-			throw new DirectoryNotFoundException("Not found git directory in '$directory' ");
+			throw new DirectoryNotFoundException("Not found git directory in '$this->path' '$directory' '$this->gitPath' ");
+		}
+
+		if (!is_file($this->pathHead)) {
+			throw new DirectoryNotFoundException("Not found git HEAD '$this->pathHead' ");
 		}
 
 		$this->init();
@@ -64,6 +88,14 @@ class GitRepositoryTags
 		 */
 		foreach (Nette\Utils\Finder::findFiles('*')->in($this->path) as $key => $file) {
 			$this->tags[] = $file->getFilename();
+
+			if ($this->byCurrentBranch) {
+				$commitId = $this->readFile($key);
+
+				if ($commitId == $this->getCurrentCommitId()) {
+					$this->currentVersion = $file->getFilename();
+				}
+			}
 
 			if (Nette\Utils\Strings::startsWith($file->getFilename(), $this->versionPrefix)) {
 				$this->versions[] = $file->getFilename();
@@ -80,8 +112,50 @@ class GitRepositoryTags
 				natsort($this->versions);
 
 				$this->latestVersion = end($this->versions);
+
+				if ($this->byCurrentBranch) {
+					$this->currentVersion = $this->latestVersion;
+				}
+
+			} else {
+				if ($this->byCurrentBranch) {
+					$this->currentVersion = $this->getCurrentCommitId();
+				}
+			}
+		} else {
+			if ($this->byCurrentBranch) {
+				$this->currentVersion = $this->getCurrentCommitId();
 			}
 		}
+	}
+
+
+	private function getCurrentCommitId()
+	{
+		if (($ref = $this->getHeadRef()) !== null) {
+			//dump($ref);
+			//dump($this->readFile($this->gitPath . '/' . $ref));
+			return $this->readFile($this->gitPath . '/' . $ref);
+		}
+		//dump($ref);
+
+		return null;
+	}
+
+
+	private function getHeadRef()
+	{
+		$rep = $this->readFile($this->pathHead);
+
+		preg_match("/ref: (.*)?/", $rep, $match);
+
+		$ref = null;
+
+		if (isset($match[1])) {
+			$ref = $match[1];
+		}
+
+		return $ref;
 	}
 
 
@@ -118,5 +192,24 @@ class GitRepositoryTags
 	public function getLatestVersion()
 	{
 		return $this->latestVersion;
+	}
+
+
+	/**
+	 * @return string|null
+	 */
+	public function getCurrentVersion()
+	{
+		return $this->currentVersion;
+	}
+
+
+	private function readFile(string $file)
+	{
+		$handle = fopen('nette.safe://' . realpath($file), 'r');
+		$content = fread($handle, filesize($file));
+		fclose($handle);
+
+		return $content;
 	}
 }
