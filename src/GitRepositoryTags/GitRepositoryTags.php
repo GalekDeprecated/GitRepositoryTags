@@ -62,7 +62,7 @@ class GitRepositoryTags
 	{
 		$this->byCurrentBranch = $byCurrentBranch;
 
-		$this->gitPath = $directory . '/.git';
+		$this->gitPath = realpath($directory) . '/.git';
 		$this->path = $this->gitPath . '/' . $this->pathGitTags;
 		$this->pathHead = $this->gitPath . '/' . $this->pathGitHead;
 
@@ -82,6 +82,9 @@ class GitRepositoryTags
 
 	private function init()
 	{
+		if ($this->byCurrentBranch) {
+			$currentCommitId = $this->getCurrentCommitId();
+		}
 		/**
 		 * @var string $key
 		 * @var SplFileInfo $file
@@ -92,7 +95,7 @@ class GitRepositoryTags
 			if ($this->byCurrentBranch) {
 				$commitId = $this->readFile($key);
 
-				if ($commitId == $this->getCurrentCommitId()) {
+				if ($commitId == $currentCommitId) {
 					$this->currentVersion = $file->getFilename();
 				}
 			}
@@ -113,17 +116,17 @@ class GitRepositoryTags
 
 				$this->latestVersion = end($this->versions);
 
-				if ($this->byCurrentBranch) {
+				if ($this->byCurrentBranch && !$this->currentVersion) {
 					$this->currentVersion = $this->latestVersion;
 				}
 
 			} else {
-				if ($this->byCurrentBranch) {
+				if ($this->byCurrentBranch && !$this->currentVersion) {
 					$this->currentVersion = $this->getCurrentCommitId();
 				}
 			}
 		} else {
-			if ($this->byCurrentBranch) {
+			if ($this->byCurrentBranch && !$this->currentVersion) {
 				$this->currentVersion = $this->getCurrentCommitId();
 			}
 		}
@@ -133,21 +136,26 @@ class GitRepositoryTags
 	private function getCurrentCommitId()
 	{
 		if (($ref = $this->getHeadRef()) !== null) {
-			//dump($ref);
-			//dump($this->readFile($this->gitPath . '/' . $ref));
 			return $this->readFile($this->gitPath . '/' . $ref);
+		} else {
+			return $this->getHeadRef(true);
 		}
-		//dump($ref);
 
 		return null;
 	}
 
 
-	private function getHeadRef()
+	private function getHeadRef($c = false)
 	{
 		$rep = $this->readFile($this->pathHead);
 
 		preg_match("/ref: (.*)?/", $rep, $match);
+
+		if ($c === true) {
+			if (empty($match)) {
+				return $rep;
+			}
+		}
 
 		$ref = null;
 
@@ -200,6 +208,7 @@ class GitRepositoryTags
 	 */
 	public function getCurrentVersion()
 	{
+		$this->init();
 		return $this->currentVersion;
 	}
 
